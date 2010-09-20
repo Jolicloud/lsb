@@ -1,0 +1,165 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null)
+
+# Take account of old dpkg-architecture output.
+ifeq ($(DEB_HOST_ARCH_CPU),)
+  DEB_HOST_ARCH_CPU := $(shell dpkg-architecture -qDEB_BUILD_GNU_CPU)
+  ifeq ($(DEB_HOST_ARCH_CPU),x86_64)
+    DEB_HOST_ARCH_CPU := amd64
+  endif
+endif
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+# Map Debian architectures to LSB architectures
+lsbarch=${DEB_HOST_ARCH_CPU}
+ifeq (${lsbarch}, i386)
+lsbarch=ia32
+endif
+ifeq (${lsbarch}, powerpc)
+lsbarch=ppc32
+endif
+
+LIBC=libc6 (>> 2.3.5)
+ifeq (${lsbarch}, hurd-i386)
+LIBC=libc0.3 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, ia64)
+LIBC=libc6.1 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, alpha)
+LIBC=libc6.1 (>> 2.3.5)
+endif
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+
+	touch configure-stamp
+
+build: build-stamp
+
+build-stamp: configure-stamp
+	dh_testdir
+
+	# Add here commands to compile the package.
+	#$(MAKE)
+	#/usr/bin/docbook-to-man debian/lsb.sgml > lsb.1
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp *.py[co] debian/lsb*substvars
+
+	# Add here commands to clean up after the build process.
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	# Add here commands to install the package into debian/lsb.
+	#$(MAKE) install DESTDIR=$(CURDIR)/debian/lsb
+	cp -p initdutils.py install_initd remove_initd lsbinstall debian/lsb-core/usr/lib/lsb
+	cp -p init-functions debian/lsb-base/lib/lsb
+	cp -p lsb-base-logging-ubuntu.sh debian/lsb-base/etc/lsb-base-logging.sh
+	cp -p lsb_release debian/lsb-release/usr/bin
+	cp -p lsb_release.py debian/lsb-release/usr/share/pyshared/
+	cp -p debian/lsb-release.bugscript debian/lsb-release/usr/share/bug/lsb-release
+	cp -p sendmail debian/lsb-invalid-mta/usr/sbin
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf -i
+	dh_installdocs -i
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+	dh_installcron -i
+	dh_installman -i
+	dh_installinfo -i
+#	dh_undocumented
+	dh_installchangelogs -i
+	dh_link -i
+	dh_strip -i
+	dh_compress -i
+	dh_fixperms -i
+#	dh_makeshlibs
+#	dh_perl
+	DH_PYCENTRAL=include-links dh_pycentral -i
+#	dh_python
+	dh_installdeb -i
+	dh_shlibdeps -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf -a
+	dh_installdocs -a
+	dh_installexamples -a test/init-skeleton
+	dh_installmenu -a
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+	dh_installcron -a
+	dh_installman -a lsb.8
+	dh_installinfo -a
+#	dh_undocumented
+	dh_installchangelogs -a
+	@echo >> debian/lsb-core.substvars "glibc=${LIBC}"
+#	@[ ${DEB_HOST_GNU_TYPE} != 'arm-linux-gnueabi' ] && echo >> debian/lsb-cxx.substvars "depends=libstdc++5" || true
+	@echo >> debian/lsb-core.substvars "provides=lsb-core-${lsbarch}"
+	@echo >> debian/lsb-cxx.substvars "provides=lsb-cxx-${lsbarch}"
+	@echo >> debian/lsb-graphics.substvars "provides=lsb-graphics-${lsbarch}"
+	@echo >> debian/lsb-desktop.substvars "provides=lsb-qt4-${lsbarch}, lsb-desktop-${lsbarch}"
+	@echo >> debian/lsb-qt4.substvars "provides=lsb-qt4-${lsbarch}"
+	@echo >> debian/lsb-multimedia.substvars "provides=lsb-multimedia-${lsbarch}"
+	@echo >> debian/lsb-languages.substvars "provides=lsb-languages-${lsbarch}"
+	@echo >> debian/lsb-printing.substvars "provides=lsb-printing-${lsbarch}"
+	@[ ${DEB_HOST_ARCH_CPU} = 'amd64' ] && echo >> debian/lsb-core.substvars "depends=libc6-i386, lib32z1" || true
+	dh_link -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+	DH_PYCENTRAL=include-links dh_pycentral -a
+#	dh_makeshlibs
+	dh_installdeb -a
+#	dh_perl
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

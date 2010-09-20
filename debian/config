@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+if [ ! -e /etc/shadow ]; then
+    db_input medium lsb/shadowconfig || true
+fi
+db_go
