@@ -1,3 +1,10 @@
+lsb (4.0-1jolicloud1) robby-lucid; urgency=low
+
+  * Add a -u,--upstream flag to lsb_release; read /etc/upstraem-
+    release/lsb-release
+
+ -- Adam McDaniel <adam@jolicloud.org>  Mon, 20 Sep 2010 15:27:07 -0600
+
 lsb (4.0-0ubuntu8) lucid; urgency=low
 
   * sendmail, debian/control, debian/rules, debian/lsb-invalid-mta.dirs:
