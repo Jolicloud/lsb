@@ -83,7 +83,7 @@ install: build
 	#$(MAKE) install DESTDIR=$(CURDIR)/debian/lsb
 	cp -p initdutils.py install_initd remove_initd lsbinstall debian/lsb-core/usr/lib/lsb
 	cp -p init-functions debian/lsb-base/lib/lsb
-	cp -p lsb-base-logging-ubuntu.sh debian/lsb-base/etc/lsb-base-logging.sh
+	cp -p lsb-base-logging-jolicloud.sh debian/lsb-base/etc/lsb-base-logging.sh
 	cp -p lsb_release debian/lsb-release/usr/bin
 	cp -p lsb_release.py debian/lsb-release/usr/share/pyshared/
 	cp -p debian/lsb-release.bugscript debian/lsb-release/usr/share/bug/lsb-release
