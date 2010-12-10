@@ -1,3 +1,10 @@
+lsb (4.0-1jolicloud2) robby; urgency=low
+
+  * Inhibit displaying LSB-based boot/shutdown messages when "quiet"
+    configured as kernel parameter, instead log to /var/log/lsb.log
+
+ -- Adam McDaniel <adam@jolicloud.org>  Fri, 10 Dec 2010 12:36:57 -0700
+
 lsb (4.0-1jolicloud1) robby-lucid; urgency=low
 
   * Add a -u,--upstream flag to lsb_release; read /etc/upstraem-
